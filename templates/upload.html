@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de XML UIF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2c5282;
+            --button-color: #2c5282;
+            --button-hover: #1a365d;
+            --success-color: #2f855a;
+            --error-color: #c53030;
+            --light-bg: #f7fafc;
+            --white: #ffffff;
+            --border-radius: 6px;
+            --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 12px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            color: white;
+            font-weight: 500;
+            font-size: 1.2rem;
+            margin-left: 25px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex: 1;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 8px;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 7px;
+            border-radius: var(--border-radius);
+        }
+
+        .logo {
+            max-height: 70px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            position: relative;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            background-color: var(--white);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .alert-success {
+            color: var(--success-color);
+            border-color: var(--success-color);
+            background-color: rgba(56, 142, 60, 0.1);
+        }
+
+        .alert-error {
+            color: var(--error-color);
+            border-color: var(--error-color);
+            background-color: rgba(211, 47, 47, 0.1);
+        }
+
+        .instructions {
+            background-color: rgba(0, 85, 184, 0.05);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .file-input-button {
+            border: 2px dashed #cbd5e0;
+            border-radius: var(--border-radius);
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            background-color: var(--light-bg);
+            transition: all 0.3s ease;
+        }
+
+        .file-input-button:hover {
+            border-color: var(--secondary-color);
+            background-color: rgba(0, 85, 184, 0.05);
+        }
+
+        .file-input-button i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .file-input-button .text {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-weight: 500;
+            color: var(--primary-color);
+            padding: 8px 10px;
+            background: rgba(0, 85, 184, 0.1);
+            border-radius: 4px;
+            display: none;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--button-color);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 85, 184, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 85, 184, 0.25);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 12px 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-content p {
+            margin: 2px 0;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .copyright {
+            font-weight: 500;
+            margin-bottom: 5px !important;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 15px auto;
+            }
+
+            .card {
+                padding: 20px;
+                margin-bottom: 10px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            nav {
+                padding: 10px 0;
+            }
+
+            .nav-title {
+                font-size: 1.1rem;
+                margin-left: 15px;
+            }
+
+            .file-input-button {
+                padding: 20px 15px;
+            }
+
+            footer {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">Generador XML UIF</div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+        </div>
+
+        <div class="card">
+            <h1>Generador de XML para UIF</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <i class="fas
+                            {% if category == 'success' %}
+                                fa-check-circle
+                            {% elif category == 'error' %}
+                                fa-exclamation-circle
+                            {% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> Instrucciones:</h3>
+                <ol>
+                    <li>Suba un archivo Excel (.xlsx) con las hojas requeridas: encabezado, persona_moral, operaciones</li>
+                    <li>El sistema validará el formato y generará el XML correspondiente</li>
+                    <li>Descargue el archivo XML generado</li>
+                </ol>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                <div class="form-group">
+                    <label for="file">Seleccione archivo Excel:</label>
+                    <div class="file-input-container">
+                        <div class="file-input-button" id="fileInputLabel">
+                            <i class="fas fa-file-excel"></i>
+                            <div class="text">Haz clic para seleccionar un archivo o arrástralo aquí</div>
+                            <div class="file-name" id="fileName"></div>
+                        </div>
+                        <input type="file" id="file" name="file" accept=".xlsx" required>
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn">
+                    <i class="fas fa-cogs"></i> Generar XML
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p class="copyright">© Copyright PHS. Todos los derechos reservados</p>
+            <p>Designed by PHS Roble 1634, Santa María Sector C</p>
+            <p>67190 Guadalupe, Nuevo León, México</p>
+            <p>Telefono: (81) 1469 1039</p>
+            <p>Correo: hola@phs.mx</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+            const fileNameElement = document.getElementById('fileName');
+
+            fileNameElement.textContent = fileName;
+            fileNameElement.style.display = 'block';
+
+            const fileInputLabel = document.getElementById('fileInputLabel');
+            if (e.target.files[0]) {
+                fileInputLabel.style.borderColor = '#388e3c';
+                fileInputLabel.style.backgroundColor = 'rgba(56, 142, 60, 0.05)';
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            submitBtn.disabled = true;
+        });
+
+        const fileInputLabel = document.getElementById('fileInputLabel');
+        const fileInput = document.getElementById('file');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputLabel.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            fileInputLabel.style.borderColor = 'var(--secondary-color)';
+            fileInputLabel.style.backgroundColor = 'rgba(0, 85, 184, 0.1)';
+        }
+
+        function unhighlight() {
+            fileInputLabel.style.borderColor = fileInput.files.length ? '#388e3c' : '#cbd5e0';
+            fileInputLabel.style.backgroundColor = fileInput.files.length ? 'rgba(56, 142, 60, 0.05)' : 'var(--light-bg)';
+        }
+
+        fileInputLabel.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        }
+    </script>
+</body>
+</html>
