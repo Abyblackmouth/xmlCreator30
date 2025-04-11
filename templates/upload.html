@@ -8,16 +8,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #1a365d;
-            --secondary-color: #2c5282;
-            --button-color: #2c5282;
-            --button-hover: #1a365d;
+            --primary-color: #1a4b8c;  /* Azul más vibrante */
+            --secondary-color: #2a67b5; /* Azul secundario más vivo */
+            --button-color: #2a67b5;
+            --button-hover: #1a4b8c;
             --success-color: #2f855a;
             --error-color: #c53030;
-            --light-bg: #f7fafc;
             --white: #ffffff;
+            --light-bg: #f8fafc;       /* Fondo más claro */
             --border-radius: 6px;
             --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --card-border: 1px solid rgba(42, 103, 181, 0.15);
         }
 
         body {
@@ -40,10 +41,9 @@
 
         .nav-container {
             max-width: 1200px;
-            margin: 0 auto;
             padding: 0 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
         }
 
@@ -51,7 +51,8 @@
             color: white;
             font-weight: 500;
             font-size: 1.2rem;
-            margin-left: 25px;
+            margin-left: 0;
+            width: 100%;
         }
 
         .main-container {
@@ -67,10 +68,15 @@
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 25px;
-            border: none;
+            border: var(--card-border);
             position: relative;
             overflow: hidden;
             margin-bottom: 15px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .card::before {
@@ -86,15 +92,17 @@
         .logo-container {
             text-align: center;
             margin-bottom: 8px;
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: rgba(0, 0, 0, 0.03);
             padding: 7px;
             border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .logo {
             max-height: 70px;
             margin-bottom: 8px;
-            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.3));
+            cursor: pointer;
         }
 
         h1 {
@@ -133,6 +141,7 @@
             align-items: center;
             background-color: var(--white);
             box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .alert i {
@@ -143,17 +152,17 @@
         .alert-success {
             color: var(--success-color);
             border-color: var(--success-color);
-            background-color: rgba(56, 142, 60, 0.1);
+            background-color: rgba(56, 142, 60, 0.08);
         }
 
         .alert-error {
             color: var(--error-color);
             border-color: var(--error-color);
-            background-color: rgba(211, 47, 47, 0.1);
+            background-color: rgba(211, 47, 47, 0.08);
         }
 
         .instructions {
-            background-color: rgba(0, 85, 184, 0.05);
+            background-color: rgba(42, 103, 181, 0.05);
             padding: 15px 20px;
             border-radius: var(--border-radius);
             margin-bottom: 20px;
@@ -199,7 +208,7 @@
 
         .file-input-button:hover {
             border-color: var(--secondary-color);
-            background-color: rgba(0, 85, 184, 0.05);
+            background-color: rgba(42, 103, 181, 0.05);
         }
 
         .file-input-button i {
@@ -219,7 +228,7 @@
             font-weight: 500;
             color: var(--primary-color);
             padding: 8px 10px;
-            background: rgba(0, 85, 184, 0.1);
+            background: rgba(42, 103, 181, 0.1);
             border-radius: 4px;
             display: none;
         }
@@ -245,13 +254,13 @@
             font-weight: 500;
             width: 100%;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 85, 184, 0.2);
+            box-shadow: 0 4px 8px rgba(42, 103, 181, 0.2);
         }
 
         button:hover {
             background-color: var(--button-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 85, 184, 0.25);
+            box-shadow: 0 6px 12px rgba(42, 103, 181, 0.25);
         }
 
         button:active {
@@ -266,7 +275,7 @@
             background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             color: white;
             text-align: center;
-            padding: 12px 20px;
+            padding: 2px 25px;
             margin-top: auto;
         }
 
@@ -278,12 +287,14 @@
         .footer-content p {
             margin: 2px 0;
             font-size: 0.8rem;
-            line-height: 1.3;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .copyright {
             font-weight: 500;
             margin-bottom: 5px !important;
+            color: white !important;
         }
 
         @media (max-width: 768px) {
@@ -306,7 +317,6 @@
 
             .nav-title {
                 font-size: 1.1rem;
-                margin-left: 15px;
             }
 
             .file-input-button {
@@ -328,7 +338,9 @@
 
     <div class="main-container">
         <div class="logo-container">
-            <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+            <a href="https://phspro.com.mx/?view=home" target="_blank">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+            </a>
         </div>
 
         <div class="card">
@@ -431,7 +443,7 @@
 
         function highlight() {
             fileInputLabel.style.borderColor = 'var(--secondary-color)';
-            fileInputLabel.style.backgroundColor = 'rgba(0, 85, 184, 0.1)';
+            fileInputLabel.style.backgroundColor = 'rgba(42, 103, 181, 0.1)';
         }
 
         function unhighlight() {

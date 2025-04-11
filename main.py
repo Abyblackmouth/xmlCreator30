@@ -6,19 +6,18 @@ from xml.dom import minidom
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 
-# Configuración de rutas multiplataforma
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 # Inicialización de la aplicación Flask
-app = Flask(__name__,
-            static_folder=os.path.join(BASE_DIR, 'static'),
-            template_folder=os.path.join(BASE_DIR, 'templates'))
-app.secret_key = 'tu_clave_secreta_aqui'  # Cambia esto en producción
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+app.secret_key = 'tu_clave_secreta_aqui'  # IMPORTANTE: Cambiar por una clave segura en producción
 
 # Configuración de la aplicación
-ALLOWED_EXTENSIONS = {'xlsx'}
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+ALLOWED_EXTENSIONS = {'xlsx'}  # Solo permitir archivos Excel
+UPLOAD_FOLDER = 'uploads'  # Carpeta para subir archivos
+
+# Crear las carpetas si no existen
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Configurar las rutas en la aplicación
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -32,6 +31,7 @@ def generar_xml_uif(archivo_excel):
     Función principal que genera el XML para UIF a partir de un archivo Excel
     Retorna: (ruta_del_xml_generado, mensaje_de_error)
     """
+    # Lista de hojas requeridas en el Excel
     hojas_requeridas = ['encabezado', 'persona_moral', 'operaciones']
 
     try:
@@ -52,7 +52,8 @@ def generar_xml_uif(archivo_excel):
         # Crear nombre del archivo XML de salida
         denominacion = persona_df.iloc[0]['denominacion_razon'].replace(' ', '_').replace('.', '')[:30]
         mes_reportado = str(encabezado_df.iloc[0]['mes_reportado'])
-        xml_salida = os.path.join(app.config['UPLOAD_FOLDER'], f"informe1.0_{denominacion}_{mes_reportado}.xml")
+        xml_salida = f"informe1.0_{denominacion}_{mes_reportado}.xml"
+        xml_salida = os.path.join(app.config['UPLOAD_FOLDER'], xml_salida)
 
         # Validación 3: Verificar columnas requeridas en hoja 'encabezado'
         columnas_requeridas = ['mes_reportado', 'clave_sujeto_obligado', 'clave_actividad',
@@ -104,6 +105,7 @@ def generar_xml_uif(archivo_excel):
             'giro_mercantil': persona_df.iloc[0]['giro_mercantil']
         }
 
+        # Agregar cada dato al XML
         for tag, valor in datos_persona.items():
             ET.SubElement(persona_moral, tag).text = str(valor)
 
@@ -129,7 +131,7 @@ def generar_xml_uif(archivo_excel):
             'colonia': persona_df.iloc[0]['colonia'],
             'calle': persona_df.iloc[0]['calle'],
             'numero_exterior': persona_df.iloc[0]['numero_exterior'],
-            'codigo_postal': str(persona_df.iloc[0]['codigo_postal']).zfill(5)
+            'codigo_postal': str(persona_df.iloc[0]['codigo_postal']).zfill(5)  # Asegurar 5 dígitos
         }
 
         for tag, valor in datos_domicilio.items():
@@ -145,11 +147,12 @@ def generar_xml_uif(archivo_excel):
         operaciones_df = pd.read_excel(xls, 'operaciones')
         detalle_operaciones = ET.SubElement(aviso, "detalle_operaciones")
 
+        # Procesar cada operación en el Excel
         for _, operacion in operaciones_df.iterrows():
             datos_op = ET.SubElement(detalle_operaciones, "datos_operacion")
 
             # Fecha y tipo de operación
-            fecha_op = str(operacion['fecha_operacion']).split('.')[0]
+            fecha_op = str(operacion['fecha_operacion']).split('.')[0]  # Eliminar decimales si es datetime
             ET.SubElement(datos_op, "fecha_operacion").text = fecha_op
 
             tipo_operacion = str(operacion['tipo_operacion']).split('.')[0]
@@ -162,6 +165,7 @@ def generar_xml_uif(archivo_excel):
             str(operacion['instrumento_monetario']).split('.')[0]
             ET.SubElement(datos_efectivo, "moneda").text = str(operacion['moneda']).split('.')[0]
 
+            # Formatear monto con 2 decimales
             try:
                 ET.SubElement(datos_efectivo, "monto_operacion").text = f"{float(operacion['monto_operacion']):.2f}"
             except (ValueError, TypeError):
@@ -175,7 +179,7 @@ def generar_xml_uif(archivo_excel):
             cp_recep = str(operacion['codigo_postal_recepcion']).split('.')[0]
             ET.SubElement(recepcion, "codigo_postal").text = cp_recep
 
-            # Custodia (solo para operación 1003)
+            # Custodia (solo para operación tipo 1003)
             if tipo_operacion == "1003":
                 custodia = ET.SubElement(datos_op, "custodia")
 
@@ -204,10 +208,11 @@ def generar_xml_uif(archivo_excel):
             dest_persona = str(operacion['destinatario_persona_aviso']).upper()
             ET.SubElement(destinatario, "destinatario_persona_aviso").text = dest_persona
 
-        # Generar XML formateado
+        # Generar XML formateado con sangría
         xml_str = ET.tostring(root, encoding='utf-8')
         xml_formateado = minidom.parseString(xml_str).toprettyxml(indent="  ", encoding="utf-8")
 
+        # Guardar el archivo XML
         with open(xml_salida, "wb") as f:
             f.write(xml_formateado)
 
@@ -217,25 +222,31 @@ def generar_xml_uif(archivo_excel):
         return None, str(e)
 
 
+# Rutas de la aplicación Flask
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """Manejador de la página principal (subida de archivos)"""
     if request.method == 'POST':
+        # Verificar que se subió un archivo
         if 'file' not in request.files:
             flash('No se seleccionó ningún archivo', 'error')
             return redirect(request.url)
 
         file = request.files['file']
 
+        # Verificar que se seleccionó un archivo
         if file.filename == '':
             flash('No se seleccionó ningún archivo', 'error')
             return redirect(request.url)
 
+        # Verificar extensión y subir archivo
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
+            # Generar XML
             xml_path, error = generar_xml_uif(filepath)
 
             if error:
@@ -262,18 +273,13 @@ def download(filename):
 
 
 if __name__ == '__main__':
-    # Crear carpetas necesarias si no existen
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
-    os.makedirs(os.path.join(BASE_DIR, 'templates'), exist_ok=True)
-
     # Modo de operación: CLI o Web
     if len(sys.argv) > 1 and sys.argv[1] == '--cli':
         # Modo consola (Command Line Interface)
         if len(sys.argv) > 2:
-            input_file = sys.argv[2]
+            input_file = sys.argv[2]  # Tomar el archivo de entrada como parámetro
         else:
-            input_file = "datos.xlsx"
+            input_file = "datos.xlsx"  # Archivo por defecto
 
         print(f"Procesando archivo: {input_file}")
         xml_path, error = generar_xml_uif(input_file)
@@ -286,4 +292,4 @@ if __name__ == '__main__':
             sys.exit(0)
     else:
         # Modo web (Flask)
-        app.run(debug=False, host='0.0.0.0', port=5000)
+        app.run(debug=True)  # Ejecutar la aplicación en modo debug
